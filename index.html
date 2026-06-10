@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>For You</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+    <main class="app">
+        <!-- Opening Screen -->
+        <section id="intro-screen" class="screen active">
+            <!-- Change this to her name -->
+            <h1 id="name-title">Glenda Shecid</h1>
+
+            <p class="subtitle">Tap your name to unlock the game.</p>
+
+            <button id="start-button" class="main-button">
+                Start
+            </button>
+        </section>
+
+        <!-- Game Screen -->
+        <section id="game-screen" class="screen">
+            <div class="game-header">
+                <p id="hud-left">Coop: 0/7</p>
+                <p id="hud-right">Herd the chickens!</p>
+            </div>
+
+            <div id="game-area"></div>
+
+            <div id="dpad">
+                <button id="dpad-up" class="dpad-btn">&#x25B2;</button>
+                <button id="dpad-left" class="dpad-btn">&#x25C4;</button>
+                <div class="dpad-center"></div>
+                <button id="dpad-right" class="dpad-btn">&#x25BA;</button>
+                <button id="dpad-down" class="dpad-btn">&#x25BC;</button>
+            </div>
+        </section>
+
+        <!-- Win Screen -->
+        <section id="win-screen" class="screen">
+            <p class="eyebrow">Everyone's happy!</p>
+
+            <h2>You won!!!</h2>
+
+            <p class="subtitle">Claim your reward:</p>
+
+            <div class="reward-buttons">
+                <button class="reward-btn" id="reward-match">Matcha</button>
+                <button class="reward-btn" id="reward-coffee">Coffee</button>
+                <button class="reward-btn" id="reward-other">Other</button>
+            </div>
+
+            <div class="sticky-note">
+                I didn't get to connect a database :( So these buttons don't actually do anything, and I can't see your
+                response, but have fun
+                clicking them and let me know your reward!)
+            </div>
+
+            <button id="play-again-button" class="main-button" style="margin-top:16px">
+                Play again
+            </button>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
