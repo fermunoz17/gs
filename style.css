@@ -83,11 +83,29 @@ body {
     display: flex;
 }
 
+#splash-screen {
+    background-color: #000000;
+}
+
 #intro-screen,
 #win-screen {
     background-color: #2d1b69;
     background-image:
         radial-gradient(ellipse at 50% 40%, #4a2a8a 0%, #2d1b69 60%, #1a0d40 100%);
+}
+
+#splash-text {
+    margin: 0;
+    font-size: clamp(0.65rem, 3vw, 1rem);
+    color: #e8d0ff;
+    letter-spacing: 0.12em;
+    text-shadow: 0 0 24px rgba(220, 180, 255, 0.5);
+    animation: splashFadeIn 0.7s ease-out both;
+}
+
+@keyframes splashFadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0);   }
 }
 
 .mode-buttons {
@@ -134,7 +152,7 @@ body {
 
 #name-title {
     margin: 0 0 8px;
-    font-size: clamp(2rem, 12vw, 5rem);
+    font-size: clamp(0.9rem, 4.5vw, 2rem);
     line-height: 1.1;
     text-transform: uppercase;
     letter-spacing: 0.08em;
@@ -490,7 +508,7 @@ h2 {
     }
 
     #name-title {
-        font-size: clamp(1.4rem, 7vw, 2.6rem);
+        font-size: clamp(0.8rem, 3.5vw, 1.4rem);
         margin: 0 0 4px;
     }
 

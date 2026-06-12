@@ -48,9 +48,20 @@ window.addEventListener('resize', checkOrientation);
 checkOrientation();
 
 // ── Screen management ──────────────────────────────────────────
-const introScreen = document.getElementById("intro-screen");
-const gameScreen = document.getElementById("game-screen");
-const winScreen = document.getElementById("win-screen");
+const splashScreen = document.getElementById("splash-screen");
+const introScreen  = document.getElementById("intro-screen");
+const gameScreen   = document.getElementById("game-screen");
+const winScreen    = document.getElementById("win-screen");
+
+// Auto-transition from splash to intro after 1.8–2.6 s
+;(function () {
+    const hold = 1400 + Math.random() * 800;   // 1.4–2.2 s visible
+    setTimeout(() => {
+        splashScreen.style.transition = 'opacity 0.5s ease';
+        splashScreen.style.opacity = '0';
+        setTimeout(() => showScreen(introScreen), 520);
+    }, hold);
+}());
 
 function tryFullscreen() {
     const el = document.documentElement;
@@ -97,7 +108,7 @@ document.getElementById('btn-hard').addEventListener('click', () => {
 });
 
 function showScreen(s) {
-    [introScreen, gameScreen, winScreen].forEach(x => x.classList.remove("active"));
+    [splashScreen, introScreen, gameScreen, winScreen].forEach(x => x.classList.remove("active"));
     s.classList.add("active");
 }
 
