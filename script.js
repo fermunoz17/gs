@@ -73,7 +73,7 @@ const winScreen    = document.getElementById("win-screen");
         function onRotate() {
             if (isLandscape()) {
                 window.removeEventListener('resize', onRotate);
-                setTimeout(doTransition, 400); // short pause after rotate
+                setTimeout(doTransition, 1800); // pause after rotate so she can read it
             }
         }
         window.addEventListener('resize', onRotate);
