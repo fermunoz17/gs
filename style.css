@@ -226,19 +226,19 @@ body {
 #dpad-hint-label {
     display: none;
     position: fixed;
-    bottom: calc(28px + 3 * 52px + 2 * 3px + 10px);
+    bottom: calc(28px + 3 * 62px + 2 * 3px + 10px);
     right: 28px;
-    width: calc(3 * 52px + 2 * 3px);
+    width: calc(3 * 62px + 2 * 3px);
     text-align: center;
-    font-size: 0.42rem;
+    font-size: 0.44rem;
     color: #ffe066;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.06em;
     z-index: 51;
     animation: dpadLabelPulse 0.8s steps(2, end) infinite alternate;
 }
 
 @keyframes dpadLabelPulse {
-    from { opacity: 0.6; }
+    from { opacity: 0.55; }
     to   { opacity: 1;   }
 }
 
@@ -269,30 +269,27 @@ body {
     bottom: 28px;
     right: 28px;
     display: grid;
-    grid-template-columns: repeat(3, 52px);
-    grid-template-rows: repeat(3, 52px);
-    gap: 3px;
+    grid-template-columns: repeat(3, 62px);
+    grid-template-rows: repeat(3, 62px);
+    gap: 4px;
     z-index: 50;
     user-select: none;
     -webkit-user-select: none;
     touch-action: none;
 }
 
-.dpad-btn.hint {
-    animation: dpadHint 0.7s steps(2, end) infinite alternate;
+/* Sequential up→right→down→left highlight — each button bright for 25% of the 1.6s cycle */
+@keyframes dpadTurn {
+    0%   { background: rgba(255, 224, 102, 0.7);  box-shadow: 3px 3px 0 #b8860b, 0 0 18px #ffe066; border-color: #fff; }
+    24%  { background: rgba(255, 224, 102, 0.7);  box-shadow: 3px 3px 0 #b8860b, 0 0 18px #ffe066; border-color: #fff; }
+    25%  { background: rgba(255, 224, 102, 0.08); box-shadow: 3px 3px 0 #b8860b; border-color: rgba(255,224,102,0.35); }
+    100% { background: rgba(255, 224, 102, 0.08); box-shadow: 3px 3px 0 #b8860b; border-color: rgba(255,224,102,0.35); }
 }
 
-@keyframes dpadHint {
-    from {
-        background: rgba(255, 224, 102, 0.15);
-        box-shadow: 3px 3px 0 #b8860b;
-    }
-    to {
-        background: rgba(255, 224, 102, 0.55);
-        box-shadow: 3px 3px 0 #b8860b, 0 0 14px #ffe066;
-        border-color: #ffffff;
-    }
-}
+#dpad-up.hint    { animation: dpadTurn 1.6s linear infinite; animation-delay:    0s; }
+#dpad-right.hint { animation: dpadTurn 1.6s linear infinite; animation-delay: -1.2s; }
+#dpad-down.hint  { animation: dpadTurn 1.6s linear infinite; animation-delay: -0.8s; }
+#dpad-left.hint  { animation: dpadTurn 1.6s linear infinite; animation-delay: -0.4s; }
 
 #dpad-up    { grid-column: 2; grid-row: 1; }
 #dpad-left  { grid-column: 1; grid-row: 2; }
@@ -540,18 +537,18 @@ h2 {
     }
 
     #dpad {
-        bottom: 10px;
+        bottom: 12px;
         right: 14px;
-        grid-template-columns: repeat(3, 46px);
-        grid-template-rows: repeat(3, 46px);
+        grid-template-columns: repeat(3, 56px);
+        grid-template-rows: repeat(3, 56px);
         gap: 3px;
     }
 
     #dpad-hint-label {
-        bottom: calc(10px + 3 * 46px + 2 * 3px + 8px);
+        bottom: calc(12px + 3 * 56px + 2 * 3px + 8px);
         right: 14px;
-        width: calc(3 * 46px + 2 * 3px);
-        font-size: 0.38rem;
+        width: calc(3 * 56px + 2 * 3px);
+        font-size: 0.4rem;
     }
 
 }
