@@ -103,7 +103,6 @@ function resizeCanvas() {
 }
 resizeCanvas();
 (window.visualViewport || window).addEventListener('resize', resizeCanvas);
-recalcSizes(); // initial sizes before first startGame
 
 // ── Pixel scale (recalculated per game start based on screen size) ──
 let PX = 6;
