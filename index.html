@@ -14,6 +14,13 @@
 </head>
 
 <body>
+    <!-- Rotate prompt — shown when device is portrait -->
+    <div id="rotate-prompt">
+        <div id="rotate-icon">&#x1F4F1;</div>
+        <p id="rotate-text">Rotate your phone!</p>
+        <p id="rotate-sub">This game is best in landscape</p>
+    </div>
+
     <main class="app">
         <!-- Opening Screen -->
         <section id="intro-screen" class="screen active">
@@ -21,6 +28,11 @@
             <h1 id="name-title">Glenda Shecid</h1>
 
             <p class="subtitle">Tap your name to unlock the game.</p>
+
+            <div class="mode-buttons">
+                <button id="btn-easy" class="mode-btn mode-easy selected">Easy</button>
+                <button id="btn-hard" class="mode-btn mode-hard">Hard</button>
+            </div>
 
             <button id="start-button" class="main-button">
                 Start
@@ -35,6 +47,13 @@
             </div>
 
             <div id="game-area"></div>
+
+            <div id="tutorial-overlay">
+                <div id="tutorial-panel">
+                    <p id="tutorial-text"></p>
+                    <button id="tutorial-next" class="main-button">Next &#x25BA;</button>
+                </div>
+            </div>
 
             <div id="dpad">
                 <button id="dpad-up" class="dpad-btn">&#x25B2;</button>

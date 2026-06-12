@@ -39,13 +39,34 @@ function playBark(isPoodle) {
     } catch (e) { }
 }
 
+// ── Orientation prompt ─────────────────────────────────────────
+function checkOrientation() {
+    const portrait = window.innerHeight > window.innerWidth;
+    document.getElementById('rotate-prompt').classList.toggle('visible', portrait);
+}
+window.addEventListener('resize', checkOrientation);
+checkOrientation();
+
 // ── Screen management ──────────────────────────────────────────
 const introScreen = document.getElementById("intro-screen");
 const gameScreen = document.getElementById("game-screen");
 const winScreen = document.getElementById("win-screen");
 
 document.getElementById("start-button").addEventListener("click", startGame);
-document.getElementById("play-again-button").addEventListener("click", startGame);
+document.getElementById("play-again-button").addEventListener("click", () => showScreen(introScreen));
+
+// Mode selection
+let gameMode = 'easy';
+document.getElementById('btn-easy').addEventListener('click', () => {
+    gameMode = 'easy';
+    document.getElementById('btn-easy').classList.add('selected');
+    document.getElementById('btn-hard').classList.remove('selected');
+});
+document.getElementById('btn-hard').addEventListener('click', () => {
+    gameMode = 'hard';
+    document.getElementById('btn-hard').classList.add('selected');
+    document.getElementById('btn-easy').classList.remove('selected');
+});
 
 // Reward buttons — highlight selection, no backend needed
 ['reward-match', 'reward-coffee', 'reward-other'].forEach(id => {
@@ -419,6 +440,7 @@ let gameOver = false;
 let chickenNameIdx = 0;
 let raf = null, keys = {}, lastTs = 0, gameTime = 0;
 let particles = [];
+let tutorialActive = false;
 
 // ── Input ─────────────────────────────────────────────────────
 window.addEventListener("keydown", e => {
@@ -529,7 +551,9 @@ function makeDog(type) {
     return {
         x, y,
         vx: Math.cos(angle), vy: Math.sin(angle),
-        speed: isPoodle ? 55 + Math.random() * 20 : 72 + Math.random() * 22,
+        speed: gameMode === 'easy'
+            ? (isPoodle ? 30 + Math.random() * 10 : 38 + Math.random() * 12)
+            : (isPoodle ? 55 + Math.random() * 20 : 72 + Math.random() * 22),
         frame: 0, frameTick: 0,
         dirTimer: 1 + Math.random() * 2,
         facing: 1,
@@ -592,6 +616,126 @@ function updateHUD() {
     document.getElementById("hud-right").textContent = msg;
 }
 
+// ── Tutorial ──────────────────────────────────────────────────
+// Tutorial panels — each has text, a canvas highlight target, and button label
+const TUTORIAL_PANELS = {
+    easy: {
+        intro: {
+            text: "Welcome, Glenda!\n\nYour goal: herd all 7 chickens\ninto the coop.\n\nBut there's a catch — the dogs\nwill chase them around and\nmake things very chaotic!",
+            highlight: 'dog',
+            btn: "Next \u25BA",
+            next: 'intro2',
+        },
+        intro2: {
+            text: "Feed the dogs FIRST to keep\nthem still and out of the way.\n\nGrab the DOG FOOD bag from\nthe table and fill both bowls.\nThen the chickens are all yours!",
+            highlight: 'dogfood',
+            btn: "Got it!",
+        },
+        dogsFed: {
+            text: "The dogs are eating — nice work!\n\nNow go get the chickens.\nJust walk near one to pick it up.\nYou can carry up to 2 at once!\n\nBring them to the gate on the\nright side of the coop.",
+            highlight: 'chicken',
+            btn: "Let's go!",
+        },
+        chickensDone: {
+            text: "All 7 chickens are safe!\n\nNow grab the WATERMELON\nfrom the table and bring it\nback to the coop gate to feed them.",
+            highlight: 'watermelon',
+            btn: "Got it!",
+        },
+    },
+    hard: {
+        intro: {
+            text: "Welcome, Glenda!\n\nYour goal: herd all 7 chickens\ninto the coop.\n\nJust walk near a chicken to\npick it up — carry up to 2 at once.\nBring them to the coop gate!",
+            highlight: 'chicken',
+            btn: "Next \u25BA",
+            next: 'intro2',
+        },
+        intro2: {
+            text: "Watch out! Dogs will bump into\nyou and knock chickens loose.\nDropped chickens need 2 seconds\nbefore you can grab them again.\n\nFeed BOTH dogs to win!",
+            highlight: 'dog',
+            btn: "Let's go!",
+        },
+        chickensDone: {
+            text: "All 7 chickens are safe!\n\nNow grab the WATERMELON\nfrom the table and bring it\nback to the coop gate.",
+            highlight: 'watermelon',
+            btn: "Got it!",
+        },
+    },
+};
+
+// tutorialPhase tracks where we are in the event-driven flow
+// 'intro' | 'waiting_dogs' | 'waiting_chickens' | 'done'
+let tutorialPhase = 'done';
+let currentTutorialHighlight = null;
+let currentTutorialPanel = null;
+
+function showTutorialPanel(panel) {
+    tutorialActive = true;
+    currentTutorialPanel = panel;
+    currentTutorialHighlight = panel.highlight;
+    document.getElementById('tutorial-text').textContent = panel.text;
+    document.getElementById('tutorial-next').textContent = panel.btn;
+    document.getElementById('tutorial-overlay').classList.add('visible');
+}
+
+function dismissTutorial() {
+    tutorialActive = false;
+    currentTutorialPanel = null;
+    document.getElementById('tutorial-overlay').classList.remove('visible');
+}
+
+document.getElementById('tutorial-next').addEventListener('click', () => {
+    if (currentTutorialPanel && currentTutorialPanel.next) {
+        showTutorialPanel(TUTORIAL_PANELS[gameMode][currentTutorialPanel.next]);
+    } else {
+        dismissTutorial();
+    }
+});
+
+function drawTutorialHighlight(type) {
+    const now = performance.now();
+    const bounce = Math.abs(Math.sin(now * 0.003)) * 10;
+    const pulse = 0.5 + 0.5 * Math.sin(now * 0.005);
+
+    let tx, ty, tw, th;
+
+    if (type === 'chicken' && chickens.length > 0) {
+        let nearest = chickens[0], nearDist = Infinity;
+        for (const c of chickens) {
+            const d = Math.hypot(c.x - player.x, c.y - player.y);
+            if (d < nearDist) { nearDist = d; nearest = c; }
+        }
+        tx = nearest.x; ty = nearest.y; tw = CHICK_W; th = CHICK_H;
+    } else if (type === 'gate') {
+        tx = penX + PEN_W - FENCE_T - 22;
+        ty = gateY();
+        tw = 32; th = GATE_W;
+    } else if (type === 'watermelon') {
+        tx = tableX + WM_TABLE_OX;
+        ty = tableY - WM_H;
+        tw = WM_W; th = WM_H;
+    } else if (type === 'dogfood') {
+        tx = tableX + BAG_TABLE_OX;
+        ty = tableY - BAG_H;
+        tw = BAG_W; th = BAG_H;
+    } else if (type === 'dog' && dogs.length > 0) {
+        const d = dogs[0];
+        tx = d.x; ty = d.y; tw = DOG_W; th = DOG_H;
+    } else {
+        return;
+    }
+
+    const cx = tx + tw / 2;
+    ctx.strokeStyle = `rgba(255, 224, 102, ${0.55 + 0.45 * pulse})`;
+    ctx.lineWidth = 3;
+    ctx.strokeRect(tx - 9, ty - 9, tw + 18, th + 18);
+
+    ctx.fillStyle = '#ffe066';
+    ctx.font = 'bold 20px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('▼', cx, ty - 14 + bounce);
+    ctx.textAlign = 'left';
+}
+
 // ── Update ────────────────────────────────────────────────────
 function update(dt) {
     // Player movement
@@ -625,8 +769,9 @@ function update(dt) {
     const hw = CHAR_W - PX * 4;
     const hh = CHAR_H * 0.55;
 
-    // Pick up chickens (only when not holding an item, and not within drop immunity window)
-    if (holding === null) {
+    // Pick up chickens (only when not holding an item, drop immunity elapsed, and dogs fed in easy mode)
+    const dogsAreFed = dogs.every(d => d.eating || d.hasEaten);
+    if (holding === null && (gameMode !== 'easy' || dogsAreFed)) {
         chickens = chickens.filter(c => {
             if (carrying.length < MAX_CARRY && c.dropTimer <= 0 && rectsOverlap(hx, hy, hw, hh, c.x, c.y, CHICK_W, CHICK_H)) {
                 carrying.push({ name: c.name, color: c.color });
@@ -780,13 +925,15 @@ function update(dt) {
     for (const d of dogs) {
         const isBeagle = d.type === 'beagle';
 
-        // Currently eating — count down timer, stay in place
+        // Currently eating — count down timer (hard only; easy dogs eat forever)
         if (d.eating) {
-            d.eatTimer -= dt;
-            if (d.eatTimer <= 0) {
-                // Done eating — resume normal behavior
-                d.eating = false;
-                bowlFilled[d.bowlIdx] = false;
+            if (gameMode === 'hard') {
+                d.eatTimer -= dt;
+                if (d.eatTimer <= 0) {
+                    // Done eating — resume normal behavior
+                    d.eating = false;
+                    bowlFilled[d.bowlIdx] = false;
+                }
             }
             d.frameTick += dt;
             if (d.frameTick >= 0.18) { d.frameTick = 0; d.frame = 1 - d.frame; }
@@ -817,7 +964,9 @@ function update(dt) {
             } else {
                 const len = bowlDist || 1;
                 d.vx = bdx / len; d.vy = bdy / len;
-                d.speed = isBeagle ? 110 : 88;
+                d.speed = gameMode === 'easy'
+                    ? (isBeagle ? 55 : 44)
+                    : (isBeagle ? 110 : 88);
             }
             chasing = true;
         } else {
@@ -826,7 +975,9 @@ function update(dt) {
             if (playerDist < chaseDist) {
                 const len = playerDist || 1;
                 d.vx = pdx / len; d.vy = pdy / len;
-                d.speed = isBeagle ? 105 : 82;
+                d.speed = gameMode === 'easy'
+                    ? (isBeagle ? 52 : 40)
+                    : (isBeagle ? 105 : 82);
                 chasing = true;
             } else if (isBeagle && chickens.length > 0) {
                 // Beagle also hunts nearby free chickens
@@ -876,8 +1027,8 @@ function update(dt) {
         d.barkTimer -= dt;
         if (d.barkTimer <= 0) { playBark(d.type === 'poodle'); d.barkTimer = 3 + Math.random() * 5; }
 
-        // Dog bumps player → drop carried chickens + bark
-        if (carrying.length > 0 && rectsOverlap(player.x, player.y, CHAR_W, CHAR_H, d.x, d.y, DOG_W, DOG_H)) {
+        // Dog bumps player → drop carried chickens + bark (hard mode only)
+        if (gameMode === 'hard' && carrying.length > 0 && rectsOverlap(player.x, player.y, CHAR_W, CHAR_H, d.x, d.y, DOG_W, DOG_H)) {
             const bumpX = player.x + CHAR_W / 2;
             const bumpY = player.y + CHAR_H / 2;
             playBark(d.type === 'poodle');
@@ -905,8 +1056,30 @@ function update(dt) {
 
     updateHUD();
 
+    // Tutorial phase transitions (event-driven)
+    if (!tutorialActive && !gameOver) {
+        const allDogsFed = dogs.every(d => d.eating || d.hasEaten);
+        const allChickensIn = coopChickens.length >= TOTAL_CHICKENS;
+
+        if (gameMode === 'easy') {
+            if (tutorialPhase === 'waiting_dogs' && allDogsFed) {
+                tutorialPhase = 'waiting_chickens';
+                showTutorialPanel(TUTORIAL_PANELS.easy.dogsFed);
+            } else if (tutorialPhase === 'waiting_chickens' && allChickensIn) {
+                tutorialPhase = 'done';
+                showTutorialPanel(TUTORIAL_PANELS.easy.chickensDone);
+            }
+        } else {
+            if (tutorialPhase === 'waiting_chickens' && allChickensIn) {
+                tutorialPhase = 'done';
+                showTutorialPanel(TUTORIAL_PANELS.hard.chickensDone);
+            }
+        }
+    }
+
     // Win condition
-    if (!gameOver && chickensFed && dogs.every(d => d.hasEaten)) {
+    const dogsWin = gameMode === 'easy' || dogs.every(d => d.hasEaten);
+    if (!gameOver && chickensFed && dogsWin) {
         gameOver = true;
         setTimeout(winGame, 400);
     }
@@ -1189,8 +1362,10 @@ function draw() {
                 if (d.eating) {
                     ctx.fillStyle = '#ffe066';
                     ctx.font = 'bold 11px monospace';
-                    const secs = Math.ceil(d.eatTimer);
-                    ctx.fillText(`nom nom (${secs}s)`, Math.round(d.x) + DOG_W / 2 - 34, Math.round(d.y) - 14);
+                    const label = gameMode === 'hard'
+                        ? `nom nom (${Math.ceil(d.eatTimer)}s)`
+                        : 'nom nom :)';
+                    ctx.fillText(label, Math.round(d.x) + DOG_W / 2 - 34, Math.round(d.y) - 14);
                 }
             }
         });
@@ -1238,9 +1413,14 @@ function draw() {
 function loop(ts) {
     const dt = Math.min((ts - lastTs) / 1000, 0.05);
     lastTs = ts;
-    gameTime += dt;
-    update(dt);
+    if (!tutorialActive) {
+        gameTime += dt;
+        update(dt);
+    }
     draw();
+    if (tutorialActive) {
+        drawTutorialHighlight(currentTutorialHighlight);
+    }
     raf = requestAnimationFrame(loop);
 }
 
@@ -1280,14 +1460,24 @@ function startGame() {
     chickens = Array.from({ length: TOTAL_CHICKENS }, () => makeChicken(false));
     dogs = [makeDog('poodle'), makeDog('beagle')];
 
+    tutorialActive = false;
+    currentTutorialHighlight = null;
+    tutorialPhase = gameMode === 'easy' ? 'waiting_dogs' : 'waiting_chickens';
+    document.getElementById('tutorial-overlay').classList.remove('visible');
+
     updateHUD();
     showScreen(gameScreen);
     if (raf) cancelAnimationFrame(raf);
     lastTs = performance.now();
     raf = requestAnimationFrame(loop);
+
+    // Show intro panel after first frame renders
+    const introPanel = gameMode === 'easy' ? TUTORIAL_PANELS.easy.intro : TUTORIAL_PANELS.hard.intro;
+    requestAnimationFrame(() => showTutorialPanel(introPanel));
 }
 
 function winGame() {
     if (raf) { cancelAnimationFrame(raf); raf = null; }
+    dismissTutorial();
     showScreen(winScreen);
 }
