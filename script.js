@@ -53,14 +53,31 @@ const introScreen  = document.getElementById("intro-screen");
 const gameScreen   = document.getElementById("game-screen");
 const winScreen    = document.getElementById("win-screen");
 
-// Auto-transition from splash to intro after 1.8–2.6 s
+// Auto-transition from splash → intro.
+// If in portrait, wait for the user to rotate to landscape first.
 ;(function () {
-    const hold = 1400 + Math.random() * 800;   // 1.4–2.2 s visible
-    setTimeout(() => {
+    function doTransition() {
         splashScreen.style.transition = 'opacity 0.5s ease';
         splashScreen.style.opacity = '0';
         setTimeout(() => showScreen(introScreen), 520);
-    }, hold);
+    }
+
+    const isLandscape = () => window.innerWidth >= window.innerHeight;
+
+    if (isLandscape()) {
+        // Already landscape — proceed after the normal hold
+        const hold = 1400 + Math.random() * 800;
+        setTimeout(doTransition, hold);
+    } else {
+        // Portrait — wait for rotation then transition
+        function onRotate() {
+            if (isLandscape()) {
+                window.removeEventListener('resize', onRotate);
+                setTimeout(doTransition, 400); // short pause after rotate
+            }
+        }
+        window.addEventListener('resize', onRotate);
+    }
 }());
 
 function tryFullscreen() {
