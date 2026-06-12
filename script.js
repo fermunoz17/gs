@@ -93,11 +93,16 @@ const ctx = canvas.getContext("2d");
 ctx.imageSmoothingEnabled = false;
 
 function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    const vp = window.visualViewport;
+    const w = Math.round(vp ? vp.width  : window.innerWidth);
+    const h = Math.round(vp ? vp.height : window.innerHeight);
+    canvas.width  = w;
+    canvas.height = h;
+    canvas.style.width  = w + 'px';
+    canvas.style.height = h + 'px';
 }
 resizeCanvas();
-window.addEventListener("resize", resizeCanvas);
+(window.visualViewport || window).addEventListener('resize', resizeCanvas);
 
 // ── Pixel scale ────────────────────────────────────────────────
 const PX = 6;        // environment scale
@@ -441,6 +446,7 @@ let chickenNameIdx = 0;
 let raf = null, keys = {}, lastTs = 0, gameTime = 0;
 let particles = [];
 let tutorialActive = false;
+let dpadHintActive = false;
 
 // ── Input ─────────────────────────────────────────────────────
 window.addEventListener("keydown", e => {
@@ -678,9 +684,29 @@ function showTutorialPanel(panel) {
 }
 
 function dismissTutorial() {
+    const wasIntroFinal = currentTutorialPanel === TUTORIAL_PANELS[gameMode]?.intro2;
     tutorialActive = false;
     currentTutorialPanel = null;
     document.getElementById('tutorial-overlay').classList.remove('visible');
+    if (wasIntroFinal && gameMode === 'easy') {
+        startDpadHint();
+    }
+}
+
+function startDpadHint() {
+    dpadHintActive = true;
+    ['up', 'down', 'left', 'right'].forEach(dir => {
+        document.getElementById(`dpad-${dir}`)?.classList.add('hint');
+    });
+    document.getElementById('dpad-hint-label').style.display = 'block';
+}
+
+function dismissDpadHint() {
+    dpadHintActive = false;
+    ['up', 'down', 'left', 'right'].forEach(dir => {
+        document.getElementById(`dpad-${dir}`)?.classList.remove('hint');
+    });
+    document.getElementById('dpad-hint-label').style.display = 'none';
 }
 
 document.getElementById('tutorial-next').addEventListener('click', () => {
@@ -746,6 +772,7 @@ function update(dt) {
     if (keys['ArrowDown'] || keys['s'] || keys['S'] || keys['dpad-down']) dy += 1;
 
     const moving = dx !== 0 || dy !== 0;
+    if (moving && dpadHintActive) dismissDpadHint();
     if (moving) {
         const len = Math.sqrt(dx * dx + dy * dy) || 1;
         const step = SPEED * dt;
@@ -1462,8 +1489,10 @@ function startGame() {
 
     tutorialActive = false;
     currentTutorialHighlight = null;
+    currentTutorialPanel = null;
     tutorialPhase = gameMode === 'easy' ? 'waiting_dogs' : 'waiting_chickens';
     document.getElementById('tutorial-overlay').classList.remove('visible');
+    dismissDpadHint();
 
     updateHUD();
     showScreen(gameScreen);

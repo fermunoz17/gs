@@ -193,9 +193,8 @@ body {
 }
 
 #game-area {
-    position: relative;
-    width: 100%;
-    height: 100vh;
+    position: fixed;
+    inset: 0;
     overflow: hidden;
 }
 
@@ -215,18 +214,53 @@ body {
     padding: 0;
 }
 
+#dpad-hint-label {
+    display: none;
+    position: fixed;
+    bottom: calc(28px + 3 * 44px + 2 * 3px + 10px);
+    right: 28px;
+    width: calc(3 * 44px + 2 * 3px);
+    text-align: center;
+    font-size: 0.42rem;
+    color: #ffe066;
+    letter-spacing: 0.05em;
+    z-index: 51;
+    animation: dpadLabelPulse 0.8s steps(2, end) infinite alternate;
+}
+
+@keyframes dpadLabelPulse {
+    from { opacity: 0.6; }
+    to   { opacity: 1;   }
+}
+
 #dpad {
     position: fixed;
     bottom: 28px;
     right: 28px;
     display: grid;
-    grid-template-columns: repeat(3, 48px);
-    grid-template-rows: repeat(3, 48px);
+    grid-template-columns: repeat(3, 44px);
+    grid-template-rows: repeat(3, 44px);
     gap: 3px;
     z-index: 50;
     user-select: none;
     -webkit-user-select: none;
     touch-action: none;
+}
+
+.dpad-btn.hint {
+    animation: dpadHint 0.7s steps(2, end) infinite alternate;
+}
+
+@keyframes dpadHint {
+    from {
+        background: rgba(255, 224, 102, 0.15);
+        box-shadow: 3px 3px 0 #b8860b;
+    }
+    to {
+        background: rgba(255, 224, 102, 0.55);
+        box-shadow: 3px 3px 0 #b8860b, 0 0 14px #ffe066;
+        border-color: #ffffff;
+    }
 }
 
 #dpad-up    { grid-column: 2; grid-row: 1; }
@@ -475,10 +509,18 @@ h2 {
     }
 
     #dpad {
-        bottom: 12px;
-        right: 16px;
-        grid-template-columns: repeat(3, 44px);
-        grid-template-rows: repeat(3, 44px);
+        bottom: 10px;
+        right: 14px;
+        grid-template-columns: repeat(3, 38px);
+        grid-template-rows: repeat(3, 38px);
+        gap: 2px;
+    }
+
+    #dpad-hint-label {
+        bottom: calc(10px + 3 * 38px + 2 * 2px + 8px);
+        right: 14px;
+        width: calc(3 * 38px + 2 * 2px);
+        font-size: 0.38rem;
     }
 
     .game-header {
