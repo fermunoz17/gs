@@ -52,7 +52,27 @@ const introScreen = document.getElementById("intro-screen");
 const gameScreen = document.getElementById("game-screen");
 const winScreen = document.getElementById("win-screen");
 
-document.getElementById("start-button").addEventListener("click", startGame);
+function tryFullscreen() {
+    const el = document.documentElement;
+    try {
+        if (el.requestFullscreen) el.requestFullscreen();
+        else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+    } catch (e) {}
+}
+
+document.getElementById("start-button").addEventListener("click", () => {
+    tryFullscreen();
+    startGame();
+});
+
+document.getElementById("fullscreen-btn").addEventListener("click", () => {
+    if (document.fullscreenElement || document.webkitFullscreenElement) {
+        if (document.exitFullscreen) document.exitFullscreen();
+        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+    } else {
+        tryFullscreen();
+    }
+});
 document.getElementById("play-again-button").addEventListener("click", () => showScreen(introScreen));
 
 // Mode selection
@@ -388,11 +408,11 @@ function recalcSizes() {
 
     // Sprite render scales
     if (h <= 420) {
-        PX = 2; CHAR_PX = 3; TABLE_PX = 4;
+        PX = 2; CHAR_PX = 3; TABLE_PX = 5;
     } else if (h <= 560) {
-        PX = 3; CHAR_PX = 4; TABLE_PX = 6;
+        PX = 3; CHAR_PX = 4; TABLE_PX = 7;
     } else if (h <= 800) {
-        PX = 4; CHAR_PX = 6; TABLE_PX = 8;
+        PX = 4; CHAR_PX = 6; TABLE_PX = 9;
     } else {
         PX = 6; CHAR_PX = 8; TABLE_PX = 10;
     }

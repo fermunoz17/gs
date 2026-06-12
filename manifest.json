@@ -1,0 +1,11 @@
+{
+    "name": "For Glenda Shecid",
+    "short_name": "For You",
+    "description": "A chicken herding game",
+    "start_url": "/",
+    "display": "fullscreen",
+    "orientation": "landscape",
+    "background_color": "#2d1b69",
+    "theme_color": "#2d1b69",
+    "icons": []
+}

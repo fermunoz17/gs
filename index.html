@@ -4,9 +4,13 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="theme-color" content="#2d1b69" />
 
     <title>For You</title>
 
+    <link rel="manifest" href="manifest.json" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
@@ -24,6 +28,8 @@
     <main class="app">
         <!-- Opening Screen -->
         <section id="intro-screen" class="screen active">
+            <button id="fullscreen-btn" title="Toggle fullscreen">&#x26F6;</button>
+
             <!-- Change this to her name -->
             <h1 id="name-title">Glenda Shecid</h1>
 
