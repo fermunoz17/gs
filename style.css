@@ -180,16 +180,25 @@ body {
 
 .game-header {
     position: absolute;
-    top: 16px;
-    left: 16px;
-    right: 16px;
+    top: 8px;
+    left: 12px;
+    right: 12px;
     display: flex;
     justify-content: space-between;
-    font-size: 0.55rem;
+    font-size: 0.62rem;
     color: #00ff80;
     text-shadow: 0 0 6px #00ff80;
     z-index: 10;
     letter-spacing: 0.05em;
+}
+
+@media (max-height: 560px) and (orientation: landscape) {
+    .game-header {
+        top: 5px;
+        left: 8px;
+        right: 8px;
+        font-size: 0.55rem;
+    }
 }
 
 #game-area {
@@ -523,8 +532,4 @@ h2 {
         font-size: 0.38rem;
     }
 
-    .game-header {
-        top: 8px;
-        font-size: 0.48rem;
-    }
 }

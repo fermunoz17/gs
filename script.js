@@ -103,11 +103,12 @@ function resizeCanvas() {
 }
 resizeCanvas();
 (window.visualViewport || window).addEventListener('resize', resizeCanvas);
+recalcSizes(); // initial sizes before first startGame
 
-// ── Pixel scale ────────────────────────────────────────────────
-const PX = 6;        // environment scale
-const CHAR_PX = 8;   // character scale (player, dogs, chickens)
-const TABLE_PX = 10; // table scale (bigger surface)
+// ── Pixel scale (recalculated per game start based on screen size) ──
+let PX = 6;
+let CHAR_PX = 8;
+let TABLE_PX = 10;
 
 // ── Palette ────────────────────────────────────────────────────
 const T = null;
@@ -369,44 +370,60 @@ const DIRT = [
     [0.35, 0.85, 52, 24],
 ];
 
-// ── Game constants ────────────────────────────────────────────
-const CHAR_W = 10 * CHAR_PX;
-const CHAR_H = 16 * CHAR_PX;
-const CHICK_W = 8 * CHAR_PX;
-const CHICK_H = 8 * CHAR_PX;
-const DOG_W = 10 * CHAR_PX;
-const DOG_H = 7 * CHAR_PX;
-const TABLE_W = 14 * TABLE_PX;
-const TABLE_H = 6 * TABLE_PX;
-const WM_W = 6 * PX;
-const WM_H = 5 * PX;
-const DF_W = 6 * PX;
-const DF_H = 4 * PX;
+// ── Game constants (let = recalculated on resize/start) ───────
+let CHAR_W, CHAR_H, CHICK_W, CHICK_H, DOG_W, DOG_H;
+let TABLE_W, TABLE_H;
+let WM_W, WM_H, DF_W, DF_H, BAG_W, BAG_H;
+let WM_TABLE_OX, BAG_TABLE_OX;
+let FLEE_DIST, HEADER_H;
+let PEN_W, PEN_H, FENCE_T, GATE_W;
+let DOG_AREA_W, DOG_AREA_H;
 
 const SPEED = 150;
 const WALK_RATE = 0.13;
 const TOTAL_CHICKENS = 7;
 const MAX_CARRY = 2;
-const FLEE_DIST = 90;
-const HEADER_H = 55;
 
-// Coop pen
-const PEN_W = 200;
-const PEN_H = 170;
-const FENCE_T = 10;
-const GATE_W = 58;
+function recalcSizes() {
+    const h = canvas.height;
 
-// Item offsets on table (from tableX)
-const WM_TABLE_OX = TABLE_PX * 1;   // watermelon left edge
+    // Sprite render scales
+    if (h <= 420) {
+        PX = 2; CHAR_PX = 3; TABLE_PX = 4;
+    } else if (h <= 560) {
+        PX = 3; CHAR_PX = 4; TABLE_PX = 6;
+    } else if (h <= 800) {
+        PX = 4; CHAR_PX = 6; TABLE_PX = 8;
+    } else {
+        PX = 6; CHAR_PX = 8; TABLE_PX = 10;
+    }
 
-// Dog eating area dimensions
-const DOG_AREA_W = 152;
-const DOG_AREA_H = 56;
+    // Derived sprite sizes
+    CHAR_W = 10 * CHAR_PX;
+    CHAR_H = 16 * CHAR_PX;
+    CHICK_W = 8 * CHAR_PX;
+    CHICK_H = 8 * CHAR_PX;
+    DOG_W   = 10 * CHAR_PX;
+    DOG_H   =  7 * CHAR_PX;
+    TABLE_W = 14 * TABLE_PX;
+    TABLE_H =  6 * TABLE_PX;
+    WM_W = 6 * PX;  WM_H = 5 * PX;
+    DF_W = 6 * PX;  DF_H = 4 * PX;
+    BAG_W = 5 * PX; BAG_H = 7 * PX;
+    WM_TABLE_OX  = TABLE_PX * 1;
+    BAG_TABLE_OX = TABLE_PX * 8;
 
-// Dog food bag size
-const BAG_W = 5 * PX;
-const BAG_H = 7 * PX;
-const BAG_TABLE_OX = TABLE_PX * 8;  // offset from tableX
+    // Layout sizes — scale relative to 900px baseline
+    const s = Math.min(1, h / 900);
+    PEN_W  = Math.round(200 * s);
+    PEN_H  = Math.round(170 * s);
+    FENCE_T = Math.max(5, Math.round(10 * s));
+    GATE_W  = Math.round(58  * s);
+    DOG_AREA_W = Math.round(152 * s);
+    DOG_AREA_H = Math.round(56  * s);
+    FLEE_DIST  = Math.round(90  * s);
+    HEADER_H   = h <= 440 ? 32 : h <= 600 ? 40 : 55;
+}
 
 // Chicken names and per-name colors
 const CHICKEN_NAMES = ['Esther', 'Carmela', 'Merlina', 'Patricia', 'Diana', 'Matilde', 'Margarita'];
@@ -1453,6 +1470,7 @@ function loop(ts) {
 
 // ── Game lifecycle ────────────────────────────────────────────
 function startGame() {
+    recalcSizes();
     carrying = [];
     holding = null;
     watermelonAvail = true;
