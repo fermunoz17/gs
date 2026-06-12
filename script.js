@@ -753,6 +753,12 @@ document.getElementById('tutorial-next').addEventListener('click', () => {
     }
 });
 
+document.getElementById('tutorial-skip').addEventListener('click', () => {
+    tutorialPhase = 'done';
+    dismissTutorial();
+    dismissDpadHint();
+});
+
 function drawTutorialHighlight(type) {
     const now = performance.now();
     const bounce = Math.abs(Math.sin(now * 0.003)) * 10;
@@ -1290,6 +1296,21 @@ function drawCoopArea() {
     ctx.fillStyle = CL;
     ctx.fillRect(penX + PEN_W - FT - 3, gy - 4, FT + 3, 5);
     ctx.fillRect(penX + PEN_W - FT - 3, gy + GATE_W, FT + 3, 5);
+
+    // Blink gate when carrying chickens in easy mode
+    if (gameMode === 'easy' && carrying.length > 0) {
+        const gFlash  = Math.floor(gameTime * 3) % 2 === 0;
+        const gBounce = Math.abs(Math.sin(gameTime * Math.PI * 3)) * 6;
+        if (gFlash) {
+            ctx.fillStyle = 'rgba(80, 255, 80, 0.45)';
+            ctx.fillRect(penX + PEN_W - FT - 2, gy, FT + 4, GATE_W);
+        }
+        ctx.fillStyle = '#00ff80';
+        ctx.font = 'bold 14px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('◄', penX + PEN_W + gBounce + 12, gy + GATE_W / 2 + 5);
+        ctx.textAlign = 'left';
+    }
 }
 
 // ── Table ─────────────────────────────────────────────────────
@@ -1338,16 +1359,21 @@ function drawTable() {
         const bagX = tableX + BAG_TABLE_OX;
         const bagY = tableY - BAG_H;
         const bagCX = bagX + BAG_W / 2;
-        const isObjective = chickensFed && holding === null;
+        const dogsAreFed = dogs.length > 0 && dogs.every(d => d.eating || d.hasEaten);
+        const isObjective = holding === null && (
+            chickensFed ||
+            (gameMode === 'easy' && !dogsAreFed)
+        );
         if (isObjective) {
             if (flash) {
                 ctx.fillStyle = 'rgba(255,180,50,0.55)';
                 ctx.fillRect(bagX - 7, bagY - 7, BAG_W + 14, BAG_H + 14);
             }
-            // bouncing arrow above
             ctx.fillStyle = '#ffcc00';
             ctx.font = 'bold 14px monospace';
-            ctx.fillText('▼', bagCX - 7, bagY - 20 + bounce);
+            ctx.textAlign = 'center';
+            ctx.fillText('▼', bagCX, bagY - 20 + bounce);
+            ctx.textAlign = 'left';
         }
         drawSprite(DOGBAG_SPRITE, bagX, bagY, PX);
         drawItemLabel('DOG FOOD', bagCX, bagY - 16);
@@ -1377,11 +1403,24 @@ function drawDogArea() {
     drawSprite(WATER_BOWL_SPRITE, wbX, wbY, PX);
 
     // Food bowls — one for poodle (idx 0), one for beagle (idx 1)
+    const bowlFlash  = Math.floor(gameTime * 3) % 2 === 0;
+    const bowlBounce = Math.abs(Math.sin(gameTime * Math.PI * 3)) * 6;
     for (let bi = 0; bi < 2; bi++) {
         const bp = getBowlPos(bi);
         if (bowlFilled[bi]) {
             ctx.fillStyle = 'rgba(255,200,80,0.35)';
             ctx.fillRect(bp.x - 5, bp.y - 5, DF_W + 10, DF_H + 10);
+        } else if (gameMode === 'easy' && holding === 'dogbag') {
+            // Blink bowl to show where to drop the food
+            if (bowlFlash) {
+                ctx.fillStyle = 'rgba(255, 180, 50, 0.55)';
+                ctx.fillRect(bp.x - 8, bp.y - 8, DF_W + 16, DF_H + 16);
+            }
+            ctx.fillStyle = '#ffcc00';
+            ctx.font = 'bold 14px monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText('▼', bp.x + DF_W / 2, bp.y - 16 + bowlBounce);
+            ctx.textAlign = 'left';
         }
         drawSprite(DOGFOOD_SPRITE, bp.x, bp.y, PX);
     }

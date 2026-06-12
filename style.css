@@ -442,6 +442,25 @@ h2 {
     text-align: center;
 }
 
+#tutorial-skip {
+    background: none;
+    border: none;
+    color: rgba(200, 200, 255, 0.45);
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.36rem;
+    cursor: pointer;
+    margin-top: 8px;
+    padding: 4px 8px;
+    letter-spacing: 0.05em;
+    display: block;
+    width: 100%;
+    text-align: center;
+}
+
+#tutorial-skip:active {
+    color: rgba(200, 200, 255, 0.85);
+}
+
 #tutorial-text {
     font-family: 'Press Start 2P', monospace;
     font-size: 0.5rem;
